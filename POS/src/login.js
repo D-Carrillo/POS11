@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import './login.css';
 
 
@@ -8,11 +9,21 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [typeOfUser, setTypeOfUser] = useState('customer');
+    const [error, setError] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(email, password, typeOfUser);
-        //we need to add the logic that would get the correct password and email for the customer
+        try {
+            const response = await axios.post('http://localhost:5000/login', {
+                email,
+                password,
+                typeOfUser
+            });
+        
+            console.log('Login success:' , response.data);
+        } catch (err) {
+            setError(err.response?.data || 'Login failed');
+        }
     };
 
 

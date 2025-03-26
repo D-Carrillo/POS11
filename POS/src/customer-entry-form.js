@@ -1,5 +1,6 @@
 //needs the "country-state-city" library
 import { useState } from "react";
+import axios from 'axios';
 import { Country, State } from 'country-state-city';
 import './customer-entry-form.css';
 
@@ -9,8 +10,10 @@ const CustomerEntryForm = () => {
     const [middleInitial, setmiddleInitial] = useState('');
     const [lastName, setLastName] = useState('');
     const [payment, setPayment] = useState("Select");
+    const [password, setPassword] = useState('');
     const [dob, setDob] = useState(null);
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
     const [aptNum, setAptNum] = useState('');
     const [houseNum, sethouseNum] = useState('');
     const [street, setStreet] = useState('');
@@ -18,15 +21,28 @@ const CustomerEntryForm = () => {
     const [zip, setZip] = useState('');
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedState, setSelectedState] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
 
     const countries = Country.getAllCountries();
     const state = selectedCountry ? State.getStatesOfCountry(selectedCountry) : [];
 
     {/* Function to place all the values into customer once hit submit */}
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const customer = { firstName, middleInitial, lastName, dob, phoneNumber, aptNum, houseNum, street, city, zip, selectedCountry, selectedState, payment };
-        console.log(customer);
+
+        try {
+            const response = await axios.post('http://localhost:5000/customer-entry-form', {
+                firstName, middleInitial, lastName, phoneNumber, email, aptNum, houseNum, street, city, selectedState, zip, selectedCountry, dob, payment, password
+            });
+        
+            setSuccess(true);
+            setError('');
+            console.log('Signup success:', response.data);
+        } catch (err) {
+            setError(err.response?.data || 'Signup failed');
+            setSuccess(false);
+        }
     }
 
     return (
@@ -82,7 +98,7 @@ const CustomerEntryForm = () => {
                                 value={payment}
                                 onChange={(e) => setPayment(e.target.value)}
                             >
-                                <option value="Select">Select</option>
+                                <option value="Select">Other</option>
                                 <option value="Visa">Visa</option>
                                 <option value="Mastercard">Mastercard</option>
                                 <option value="American Express">American Express</option>
@@ -94,7 +110,6 @@ const CustomerEntryForm = () => {
                                 type="tel"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
-                                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                                 required
                             />
                         </div>
@@ -103,8 +118,19 @@ const CustomerEntryForm = () => {
                             <input
                                 type="email"
                                 id="email"
-                                pattern=".+@example\.com"
+                                pattern=".+@(gmail\.com|yahoo\.com|outlook\.com)"
                                 maxLength={30}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Password</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
                         </div>
